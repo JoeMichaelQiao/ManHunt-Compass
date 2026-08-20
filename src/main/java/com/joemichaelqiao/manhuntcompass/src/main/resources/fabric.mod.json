@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "manhuntcompass",
+  "version": "1.0.0",
+  "name": "Manhunt Compass",
+  "description": "Adds speedrunner/hunter roles and a compass for hunters pointing to the speedrunner.",
+  "authors": ["You"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.joemichaelqiao.manhuntcompass.ManhuntCompassMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric": "*"
+  }
+}
