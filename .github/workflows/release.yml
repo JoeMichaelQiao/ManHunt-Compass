@@ -19,14 +19,21 @@ jobs:
           distribution: 'temurin'
           java-version: '25'
 
-      - name: 下载并安装 Gradle 9.0.0-rc-1
+      - name: 下载并安装 Gradle 9.0.0-rc-1（支持 Java 25）
         run: |
           wget https://services.gradle.org/distributions/gradle-9.0.0-rc-1-bin.zip
           unzip -q gradle-9.0.0-rc-1-bin.zip
           echo "$PWD/gradle-9.0.0-rc-1/bin" >> $GITHUB_PATH
-          gradle --version
+          gradle --version   # 验证版本
 
-      - name: 构建模组（禁用守护进程，避免缓存干扰）
+      - name: 升级 Fabric Loom 以支持 Java 25
+        run: |
+          # 将 build.gradle 中的 fabric-loom 版本改为最新的 1.12-SNAPSHOT
+          sed -i 's/id '\''fabric-loom'\'' version '\''1.10-SNAPSHOT'\''/id '\''fabric-loom'\'' version '\''1.12-SNAPSHOT'\''/' build.gradle
+          echo "已修改 build.gradle:"
+          grep 'fabric-loom' build.gradle
+
+      - name: 构建模组（禁用守护进程）
         run: gradle build --no-daemon
 
       - name: 上传 JAR 包
