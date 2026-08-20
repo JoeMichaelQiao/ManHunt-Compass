@@ -17,19 +17,17 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '25'        # 必须使用 Java 25
+          java-version: '25'
 
-      - name: 使用 Gradle 构建（自动下载并缓存 Gradle）
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.13'    # 与 Gradle 8.13 兼容
-
-      - name: 构建模组（强制使用正确 Java）
+      - name: 下载并安装 Gradle 9.0-rc-1（支持 Java 25）
         run: |
-          # 停止可能使用错误 Java 的旧 Daemon
-          gradle --stop
-          # 使用 --no-daemon 避免复用旧的 daemon，并通过 -D 显式指定 JAVA_HOME
-          gradle build --no-daemon -Dorg.gradle.java.home=$JAVA_HOME
+          wget https://services.gradle.org/distributions/gradle-9.0-rc-1-bin.zip
+          unzip -q gradle-9.0-rc-1-bin.zip
+          echo "$PWD/gradle-9.0-rc-1/bin" >> $GITHUB_PATH
+          gradle --version   # 验证版本
+
+      - name: 构建模组（禁用守护进程，避免缓存干扰）
+        run: gradle build --no-daemon
 
       - name: 上传 JAR 包
         uses: actions/upload-artifact@v4
