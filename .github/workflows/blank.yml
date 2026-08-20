@@ -1,0 +1,4 @@
+- name: Build with Gradle
+  # You may pin to the exact commit or the version.
+  # uses: gradle/actions@9c971963bec38e04b3d30dcc455b5382be2fdbfb
+  uses: gradle/actions@v6.3.0
