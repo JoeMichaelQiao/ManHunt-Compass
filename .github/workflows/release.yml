@@ -19,12 +19,12 @@ jobs:
           distribution: 'temurin'
           java-version: '25'
 
-      - name: 下载并安装 Gradle 9.0-rc-1（支持 Java 25）
+      - name: 下载并安装 Gradle 9.0.0-rc-1
         run: |
-          wget https://services.gradle.org/distributions/gradle-9.0-rc-1-bin.zip
-          unzip -q gradle-9.0-rc-1-bin.zip
-          echo "$PWD/gradle-9.0-rc-1/bin" >> $GITHUB_PATH
-          gradle --version   # 验证版本
+          wget https://services.gradle.org/distributions/gradle-9.0.0-rc-1-bin.zip
+          unzip -q gradle-9.0.0-rc-1-bin.zip
+          echo "$PWD/gradle-9.0.0-rc-1/bin" >> $GITHUB_PATH
+          gradle --version
 
       - name: 构建模组（禁用守护进程，避免缓存干扰）
         run: gradle build --no-daemon
