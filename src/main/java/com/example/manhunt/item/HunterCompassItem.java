@@ -19,6 +19,7 @@ import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class HunterCompassItem extends CompassItem {
@@ -35,7 +36,7 @@ public class HunterCompassItem extends CompassItem {
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(player.getServer());
 
         if (!state.isHunter(player.getUuid())) {
-            player.sendMessage(Text.literal("只有猎人可以使用这个指南针！").formatted(Formatting.RED), false);
+            player.sendMessage(Text.literal("只有猎人可以使用这个指南针！").formatted(Formatting.RED));
             return ActionResult.FAIL;
         }
 
@@ -48,7 +49,7 @@ public class HunterCompassItem extends CompassItem {
                 targetUuid = state.getSpeedrunners().keySet().iterator().next();
                 setTargetUuid(stack, targetUuid);
             } else {
-                player.sendMessage(Text.literal("没有速通者！").formatted(Formatting.RED), false);
+                player.sendMessage(Text.literal("没有速通者！").formatted(Formatting.RED));
                 return ActionResult.FAIL;
             }
         }
@@ -84,7 +85,7 @@ public class HunterCompassItem extends CompassItem {
     private static final String TARGET_UUID_KEY = "TargetUuid";
 
     private UUID getTargetUuid(ItemStack stack) {
-        NbtCompound nbt = stack.getSubNbt("manhunt");
+        NbtCompound nbt = stack.getNbt();
         if (nbt != null && nbt.containsUuid(TARGET_UUID_KEY)) {
             return nbt.getUuid(TARGET_UUID_KEY);
         }
@@ -92,7 +93,7 @@ public class HunterCompassItem extends CompassItem {
     }
 
     private void setTargetUuid(ItemStack stack, UUID uuid) {
-        NbtCompound nbt = stack.getOrCreateSubNbt("manhunt");
+        NbtCompound nbt = stack.getOrCreateNbt();
         nbt.putUuid(TARGET_UUID_KEY, uuid);
     }
 
@@ -118,8 +119,9 @@ public class HunterCompassItem extends CompassItem {
 
                     // 设置指南针指向目标位置
                     var pos = target.getBlockPos();
+                    // LodestoneTrackerComponent 需要 Optional<GlobalPos>
                     var lodestone = new LodestoneTrackerComponent(
-                        GlobalPos.create(target.getWorld().getRegistryKey(), pos),
+                        Optional.of(GlobalPos.create(target.getWorld().getRegistryKey(), pos)),
                         false
                     );
                     stack.set(DataComponentTypes.LODESTONE_TRACKER, lodestone);

@@ -1,7 +1,9 @@
 package com.example.manhunt.data;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.PersistentState;
@@ -19,6 +21,17 @@ public class StateSaverAndLoader extends PersistentState {
     private final Map<UUID, PlayerRoleData> speedrunners = new HashMap<>();
     private final Map<UUID, PlayerRoleData> hunters = new HashMap<>();
 
+    // 使用新的 Type API
+    public static final PersistentState.Type<StateSaverAndLoader> TYPE =
+            new PersistentState.Type<>(
+                    StateSaverAndLoader::new,                  // 无参构造
+                    StateSaverAndLoader::fromNbt,              // 反序列化
+                    null                                       // DataFixer（无需）
+            );
+
+    // 无参构造（用于新创建）
+    public StateSaverAndLoader() {}
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         NbtList playersList = new NbtList();
@@ -29,20 +42,21 @@ public class StateSaverAndLoader extends PersistentState {
 
         NbtList speedrunnerList = new NbtList();
         for (UUID uuid : speedrunners.keySet()) {
-            speedrunnerList.add(uuid.toString());
+            speedrunnerList.add(NbtString.of(uuid.toString()));
         }
         nbt.put("speedrunners", speedrunnerList);
 
         NbtList hunterList = new NbtList();
         for (UUID uuid : hunters.keySet()) {
-            hunterList.add(uuid.toString());
+            hunterList.add(NbtString.of(uuid.toString()));
         }
         nbt.put("hunters", hunterList);
 
         return nbt;
     }
 
-    public static StateSaverAndLoader createFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+    // 反序列化（必须与 writeNbt 匹配）
+    public static StateSaverAndLoader fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         StateSaverAndLoader state = new StateSaverAndLoader();
 
         NbtList playersList = nbt.getList("players", NbtCompound.COMPOUND_TYPE);
@@ -54,12 +68,13 @@ public class StateSaverAndLoader extends PersistentState {
             else if (data.isHunter()) state.hunters.put(data.getPlayerUuid(), data);
         }
 
+        // 兼容旧格式（可选），但我们已经从 players 重建，无需再读 speedrunners/hunters 列表
         return state;
     }
 
     public static StateSaverAndLoader getServerState(MinecraftServer server) {
         PersistentStateManager manager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
-        return manager.getOrCreate(StateSaverAndLoader::createFromNbt, StateSaverAndLoader::new, DATA_NAME);
+        return manager.getOrCreate(TYPE, DATA_NAME);
     }
 
     public PlayerRoleData getPlayerData(UUID uuid) {

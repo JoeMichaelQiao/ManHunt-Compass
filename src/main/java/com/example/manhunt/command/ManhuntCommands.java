@@ -77,8 +77,8 @@ public class ManhuntCommands {
         }
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(source.getServer());
         state.setPlayerRole(target.getUuid(), role);
-        source.sendMessage(Text.literal("已设置 " + playerName + " 为 " + role.name()).formatted(Formatting.GREEN), false);
-        target.sendMessage(Text.literal("你被分配为 " + role.name()).formatted(Formatting.GOLD), false);
+        source.sendMessage(Text.literal("已设置 " + playerName + " 为 " + role.name()).formatted(Formatting.GREEN));
+        target.sendMessage(Text.literal("你被分配为 " + role.name()).formatted(Formatting.GOLD));
         if (role == Role.HUNTER) {
             target.getInventory().offerOrDrop(new net.minecraft.item.ItemStack(ModItems.HUNTER_COMPASS));
         }
@@ -93,8 +93,8 @@ public class ManhuntCommands {
         }
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(source.getServer());
         state.setPlayerRole(target.getUuid(), Role.NONE);
-        source.sendMessage(Text.literal("已移除 " + playerName + " 的角色").formatted(Formatting.GREEN), false);
-        target.sendMessage(Text.literal("你的角色已被移除").formatted(Formatting.YELLOW), false);
+        source.sendMessage(Text.literal("已移除 " + playerName + " 的角色").formatted(Formatting.GREEN));
+        target.sendMessage(Text.literal("你的角色已被移除").formatted(Formatting.YELLOW));
         return 1;
     }
 
@@ -102,32 +102,32 @@ public class ManhuntCommands {
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(source.getServer());
         Collection<ServerPlayerEntity> allPlayers = source.getServer().getPlayerManager().getPlayerList();
         if (allPlayers.isEmpty()) {
-            source.sendMessage(Text.literal("没有在线玩家").formatted(Formatting.GRAY), false);
+            source.sendMessage(Text.literal("没有在线玩家").formatted(Formatting.GRAY));
             return 0;
         }
-        source.sendMessage(Text.literal("=== 玩家角色列表 ===").formatted(Formatting.GOLD), false);
-        source.sendMessage(Text.literal("【速通者】").formatted(Formatting.GREEN), false);
+        source.sendMessage(Text.literal("=== 玩家角色列表 ===").formatted(Formatting.GOLD));
+        source.sendMessage(Text.literal("【速通者】").formatted(Formatting.GREEN));
         boolean hasSpeedrunner = false;
         for (ServerPlayerEntity player : allPlayers) {
             if (state.isSpeedrunner(player.getUuid())) {
-                source.sendMessage(Text.literal("  - " + player.getName().getString()).formatted(Formatting.GREEN), false);
+                source.sendMessage(Text.literal("  - " + player.getName().getString()).formatted(Formatting.GREEN));
                 hasSpeedrunner = true;
             }
         }
-        if (!hasSpeedrunner) source.sendMessage(Text.literal("  (无)").formatted(Formatting.GRAY), false);
-        source.sendMessage(Text.literal("【猎人】").formatted(Formatting.RED), false);
+        if (!hasSpeedrunner) source.sendMessage(Text.literal("  (无)").formatted(Formatting.GRAY));
+        source.sendMessage(Text.literal("【猎人】").formatted(Formatting.RED));
         boolean hasHunter = false;
         for (ServerPlayerEntity player : allPlayers) {
             if (state.isHunter(player.getUuid())) {
-                source.sendMessage(Text.literal("  - " + player.getName().getString()).formatted(Formatting.RED), false);
+                source.sendMessage(Text.literal("  - " + player.getName().getString()).formatted(Formatting.RED));
                 hasHunter = true;
             }
         }
-        if (!hasHunter) source.sendMessage(Text.literal("  (无)").formatted(Formatting.GRAY), false);
-        source.sendMessage(Text.literal("【未分配】").formatted(Formatting.GRAY), false);
+        if (!hasHunter) source.sendMessage(Text.literal("  (无)").formatted(Formatting.GRAY));
+        source.sendMessage(Text.literal("【未分配】").formatted(Formatting.GRAY));
         for (ServerPlayerEntity player : allPlayers) {
             if (!state.getPlayerRole(player.getUuid()).isAssigned()) {
-                source.sendMessage(Text.literal("  - " + player.getName().getString()).formatted(Formatting.GRAY), false);
+                source.sendMessage(Text.literal("  - " + player.getName().getString()).formatted(Formatting.GRAY));
             }
         }
         return 1;
@@ -150,13 +150,13 @@ public class ManhuntCommands {
             state.setPlayerRole(hunter.getUuid(), Role.HUNTER);
             hunter.getInventory().offerOrDrop(new net.minecraft.item.ItemStack(ModItems.HUNTER_COMPASS));
         }
-        source.sendMessage(Text.literal("=== 角色分配完成 ===").formatted(Formatting.GOLD), false);
-        source.sendMessage(Text.literal("速通者: " + speedrunner.getName().getString()).formatted(Formatting.GREEN), false);
+        source.sendMessage(Text.literal("=== 角色分配完成 ===").formatted(Formatting.GOLD));
+        source.sendMessage(Text.literal("速通者: " + speedrunner.getName().getString()).formatted(Formatting.GREEN));
         for (ServerPlayerEntity player : allPlayers) {
             if (state.isHunter(player.getUuid())) {
-                player.sendMessage(Text.literal("你是猎人！追踪速通者 " + speedrunner.getName().getString()).formatted(Formatting.RED), false);
+                player.sendMessage(Text.literal("你是猎人！追踪速通者 " + speedrunner.getName().getString()).formatted(Formatting.RED));
             } else if (state.isSpeedrunner(player.getUuid())) {
-                player.sendMessage(Text.literal("你是速通者！避开所有猎人！").formatted(Formatting.GREEN), false);
+                player.sendMessage(Text.literal("你是速通者！避开所有猎人！").formatted(Formatting.GREEN));
             }
         }
         return 1;
@@ -165,7 +165,7 @@ public class ManhuntCommands {
     private static int clearAll(ServerCommandSource source) {
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(source.getServer());
         state.clearAllRoles();
-        source.sendMessage(Text.literal("已清除所有角色").formatted(Formatting.YELLOW), false);
+        source.sendMessage(Text.literal("已清除所有角色").formatted(Formatting.YELLOW));
         return 1;
     }
 }
