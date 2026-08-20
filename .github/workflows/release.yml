@@ -2,9 +2,8 @@ name: Build Mod
 
 on:
   push:
-    # 去掉分支限制，任何推送都触发（或保留您需要的分支）
   pull_request:
-  workflow_dispatch:   # 保留手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,15 +17,19 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '25'
+          java-version: '25'        # 必须使用 Java 25
 
       - name: 使用 Gradle 构建（自动下载并缓存 Gradle）
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.13'   # 指定 Gradle 版本（与 Fabric 兼容）
+          gradle-version: '8.13'    # 与 Gradle 8.13 兼容
 
-      - name: 构建模组
-        run: gradle build   # 直接使用 gradle 命令（不依赖 wrapper）
+      - name: 构建模组（强制使用正确 Java）
+        run: |
+          # 停止可能使用错误 Java 的旧 Daemon
+          gradle --stop
+          # 使用 --no-daemon 避免复用旧的 daemon，并通过 -D 显式指定 JAVA_HOME
+          gradle build --no-daemon -Dorg.gradle.java.home=$JAVA_HOME
 
       - name: 上传 JAR 包
         uses: actions/upload-artifact@v4
