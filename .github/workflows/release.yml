@@ -2,10 +2,9 @@ name: Build Mod
 
 on:
   push:
-    branches: [ "main", "master" ]
+    # 去掉分支限制，任何推送都触发（或保留您需要的分支）
   pull_request:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
+  workflow_dispatch:   # 保留手动触发
 
 jobs:
   build:
@@ -21,21 +20,13 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: 缓存 Gradle 依赖
-        uses: actions/cache@v4
+      - name: 使用 Gradle 构建（自动下载并缓存 Gradle）
+        uses: gradle/actions/setup-gradle@v4
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: 赋予 gradlew 执行权限
-        run: chmod +x gradlew
+          gradle-version: '8.10.2'   # 指定 Gradle 版本（与 Fabric 兼容）
 
       - name: 构建模组
-        run: ./gradlew build
+        run: gradle build   # 直接使用 gradle 命令（不依赖 wrapper）
 
       - name: 上传 JAR 包
         uses: actions/upload-artifact@v4
