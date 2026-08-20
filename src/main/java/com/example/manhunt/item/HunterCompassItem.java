@@ -1,8 +1,10 @@
 package com.example.manhunt.item;
 
 import com.example.manhunt.data.StateSaverAndLoader;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LodestoneTrackerComponent;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.CompassItem;
 import net.minecraft.item.ItemStack;
@@ -23,6 +25,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class HunterCompassItem extends CompassItem {
+
+    private static final String TARGET_UUID_KEY = "TargetUuid";
 
     public HunterCompassItem(Settings settings) {
         super(settings);
@@ -81,20 +85,23 @@ public class HunterCompassItem extends CompassItem {
         tooltip.add(Text.literal("只有猎人可以使用").formatted(Formatting.DARK_RED));
     }
 
-    // ---------- NBT 读写 ----------
-    private static final String TARGET_UUID_KEY = "TargetUuid";
-
+    // ---------- 使用 Data Components 读写 ----------
     private UUID getTargetUuid(ItemStack stack) {
-        NbtCompound nbt = stack.getNbt();
-        if (nbt != null && nbt.containsUuid(TARGET_UUID_KEY)) {
-            return nbt.getUuid(TARGET_UUID_KEY);
+        NbtComponent component = stack.get(DataComponentTypes.CUSTOM_DATA);
+        if (component != null) {
+            NbtCompound nbt = component.copyNbt();
+            if (nbt != null && nbt.containsUuid(TARGET_UUID_KEY)) {
+                return nbt.getUuid(TARGET_UUID_KEY);
+            }
         }
         return null;
     }
 
     private void setTargetUuid(ItemStack stack, UUID uuid) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        NbtComponent oldComponent = stack.get(DataComponentTypes.CUSTOM_DATA);
+        NbtCompound nbt = oldComponent != null ? oldComponent.copyNbt() : new NbtCompound();
         nbt.putUuid(TARGET_UUID_KEY, uuid);
+        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
     }
 
     // ---------- 静态更新方法 ----------
@@ -119,7 +126,6 @@ public class HunterCompassItem extends CompassItem {
 
                     // 设置指南针指向目标位置
                     var pos = target.getBlockPos();
-                    // LodestoneTrackerComponent 需要 Optional<GlobalPos>
                     var lodestone = new LodestoneTrackerComponent(
                         Optional.of(GlobalPos.create(target.getWorld().getRegistryKey(), pos)),
                         false
