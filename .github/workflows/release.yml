@@ -2,12 +2,16 @@ name: Build Mod
 
 on:
   push:
-  pull_request:
-  workflow_dispatch:
+    tags:              # 仅当推送标签时触发构建和发布
+      - 'v*'           # 匹配 v1.0.0, v1.2.3 等
+  pull_request:        # 也支持 PR 触发（但不发布）
+  workflow_dispatch:   # 允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 发布 Release 需要写入权限
 
     steps:
       - name: 检出代码
@@ -19,24 +23,33 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: 下载并安装 Gradle 9.0.0-rc-1（支持 Java 21）
+      - name: 下载并安装 Gradle 9.0.0-rc-1
         run: |
           wget https://services.gradle.org/distributions/gradle-9.0.0-rc-1-bin.zip
           unzip -q gradle-9.0.0-rc-1-bin.zip
           echo "$PWD/gradle-9.0.0-rc-1/bin" >> $GITHUB_PATH
           gradle --version
 
-      - name: 升级 Fabric Loom 到最新快照（兼容 Java 21 + 1.21.4）
+      - name: 升级 Fabric Loom 到最新快照
         run: |
           sed -i 's/id '\''fabric-loom'\'' version '\''1.10-SNAPSHOT'\''/id '\''fabric-loom'\'' version '\''1.12-SNAPSHOT'\''/' build.gradle
           echo "修改后的 build.gradle:"
           grep 'fabric-loom' build.gradle
 
-      - name: 构建模组（强制指定 Minecraft 版本为 1.21.4）
+      - name: 构建模组
         run: gradle build --no-daemon -Pminecraft_version=1.21.4
 
-      - name: 上传 JAR 包
+      - name: 上传 JAR 包（作为 Artifact）
         uses: actions/upload-artifact@v4
         with:
           name: manhunt-mod
           path: build/libs/*.jar
+
+      - name: 发布到 GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')   # 仅在推送标签时执行
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/libs/*.jar                 # 上传所有 JAR 文件
+          generate_release_notes: true            # 自动生成版本说明
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
