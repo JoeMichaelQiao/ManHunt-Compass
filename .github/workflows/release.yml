@@ -23,7 +23,7 @@ jobs:
       - name: 使用 Gradle 构建（自动下载并缓存 Gradle）
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.10.2'   # 指定 Gradle 版本（与 Fabric 兼容）
+          gradle-version: '8.13'   # 指定 Gradle 版本（与 Fabric 兼容）
 
       - name: 构建模组
         run: gradle build   # 直接使用 gradle 命令（不依赖 wrapper）
